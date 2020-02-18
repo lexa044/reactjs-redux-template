@@ -70,11 +70,17 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/tr
 ### References
 
 https://github.com/airbnb/javascript/tree/master/react
+
 https://dev.to/ksushiva/how-to-translate-your-react-js-app-with-i18next-12mn
+
 https://medium.com/@jishnu61/6-easy-steps-to-localize-your-react-application-internationalization-with-i18next-8de9cc3a66a1
+
 https://github.com/chaseoc/firebase-login-page
+
 https://stackblitz.com/edit/react-redux-registration-login-example?file=LoginPage%2FLoginPage.js
+
 https://github.com/davidtran/react-redux-login-flow
+
 https://medium.com/better-programming/creating-a-simple-app-with-react-js-f6aa88998952
 
 
