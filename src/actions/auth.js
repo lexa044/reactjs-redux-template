@@ -54,7 +54,7 @@ const verifySuccess = () => {
   };
 };
 
-export const loginUser = (email, password) => dispatch => {
+export const loginUser = (dispatch, email, password) => {
   dispatch(requestLogin());
   authService
     .signInWithEmailAndPassword(email, password, user => {
@@ -66,7 +66,7 @@ export const loginUser = (email, password) => dispatch => {
     });
 };
 
-export const logoutUser = () => dispatch => {
+export const logoutUser = (dispatch) => {
   dispatch(requestLogout());
   authService
     .signOut(user => {
@@ -74,7 +74,7 @@ export const logoutUser = () => dispatch => {
     });
 };
 
-export const verifyAuth = () => dispatch => {
+export const verifyAuth = (dispatch) => {
   dispatch(verifyRequest());
   authService
     .onAuthStateChanged(user => {

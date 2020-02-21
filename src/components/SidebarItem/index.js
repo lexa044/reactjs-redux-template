@@ -7,14 +7,10 @@ const propTypes = {
 };
 
 class SidebarItem extends React.Component {
-  constructor(props) {
-    super(props);
 
-    this.state = { isChecked: false };
-    this.toggleCheckboxChange = this.toggleCheckboxChange.bind(this);
-  }
+  state = { isChecked: false };
 
-  toggleCheckboxChange() {
+  toggleCheckboxChange= () =>{
     const { handleCheckboxChange, label } = this.props;
     const { isChecked } = this.state;
     this.setState({ isChecked: !isChecked });
