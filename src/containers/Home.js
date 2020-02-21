@@ -1,8 +1,7 @@
 import React from "react";
-import { connect } from "react-redux";
-import { logoutUser } from "../actions";
-import { updateFilters } from '../actions';
-import { fetchProducts } from '../actions';
+import { AppContext } from '../context/Context';
+import { logoutUser } from "../actions/auth";
+import { productService } from "../services/products";
 
 import SidebarItem from '../components/SidebarItem';
 import Spinner from '../components/Spinner';
@@ -11,16 +10,37 @@ import ProductList from '../components/ProductList';
 const hrefLink = '#';
 const availableSizes = ['XS', 'S', 'M', 'ML', 'L', 'XL', 'XXL'];
 
+const defaultState = {
+  toggled: false,
+  isLoading: false,
+  products: []
+};
+
+function reducer(state = defaultState, action = {}) {
+  switch (action.type) {
+    case 'FETCH_PRODUCTS_START':
+      return {
+        ...state,
+        isLoading: true
+      };
+    case 'FETCH_PRODUCTS_END':
+      return {
+        ...state,
+        isLoading: false,
+        products: action.payload
+      };
+    default:
+      return state;
+  }
+}
+
 class Home extends React.Component {
   
   constructor(props) {
     super(props);
     this.handleLogout = this.handleLogout.bind(this);
     this.toggleClass= this.toggleClass.bind(this);
-    this.state = {
-      isLoading: false,
-      toggled: false
-    };
+    this.state = reducer(undefined, {});
   }
 
   componentDidMount() {
@@ -34,6 +54,10 @@ class Home extends React.Component {
     }
   }
 
+  dispatch(action) {
+    this.setState(prevState => reducer(prevState, action));
+  }
+
   toggleCheckbox = label => {
     if (this.selectedCheckboxes.has(label)) {
       this.selectedCheckboxes.delete(label);
@@ -41,12 +65,14 @@ class Home extends React.Component {
       this.selectedCheckboxes.add(label);
     }
 
-    this.props.updateFilters(Array.from(this.selectedCheckboxes));
+    this.handleFetchProducts();
   };
 
   handleLogout(e) {
+    const { setIdentity } = this.context;
+
     e && e.preventDefault();
-    this.props.logoutUser();
+    logoutUser(setIdentity);
   }
 
   toggleClass(e) {
@@ -58,10 +84,23 @@ class Home extends React.Component {
   handleFetchProducts = (
     filters = this.props.filters
   ) => {
-    this.setState({ isLoading: true });
-    this.props.fetchProducts(filters, () => {
-      this.setState({ isLoading: false });
-    });
+    this.dispatch({ type: 'FETCH_PRODUCTS_START'});
+    productService.getAll(data => {
+      if (data) {
+          let { products } = data;
+          let filters = Array.from(this.selectedCheckboxes);
+          if (!!filters && filters.length > 0) {
+              products = products.filter(p =>
+                  filters.find(f => p.availableSizes.find(size => size === f))
+              );
+          }
+
+          this.dispatch({ type: 'FETCH_PRODUCTS_END', payload: products});
+      } else {
+        this.dispatch({ type: 'FETCH_PRODUCTS_END', payload: []});
+          console.log('Could not fetch products. Try again later.');
+      }
+  });
   };
 
   createCheckbox = label => (
@@ -76,11 +115,11 @@ class Home extends React.Component {
   createCheckboxes = () => availableSizes.map(this.createCheckbox);
 
   render() {
-    const { identity, products } = this.props;
-    const { isLoading } = this.state;
+    const { identity } = this.context;
+    const { toggled, isLoading, products } = this.state;
 
     return (
-      <div id="wrapper" className={this.state.toggled ? 'd-flex toggled': 'd-flex'}>
+      <div id="wrapper" className={toggled ? 'd-flex toggled': 'd-flex'}>
 
         <div className="bg-light border-right" id="sidebar-wrapper">
           <div className="sidebar-heading">Bootstrap</div>
@@ -108,7 +147,7 @@ class Home extends React.Component {
                 
                 <li className="nav-item dropdown">
                   <a className="nav-link dropdown-toggle" href={hrefLink} id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {identity.firstName}
+                    {identity.user.firstName}
                   </a>
 
                   <div className="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
@@ -138,17 +177,6 @@ class Home extends React.Component {
   }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    isLoggingOut: state.auth.isLoggingOut,
-    logoutError: state.auth.logoutError,
-    identity: state.auth.user,
-    products: state.shelf.products,
-    filters: state.filters.items
-  }
-}
+Home.contextType = AppContext;
 
-export default connect(
-  mapStateToProps,
-  { fetchProducts, updateFilters, logoutUser }
-)(Home);
+export default Home;

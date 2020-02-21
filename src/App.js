@@ -1,33 +1,13 @@
-import React from "react";
+import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
+import Layout from './layouts/Layout';
 
-import { Route, Switch } from "react-router-dom";
-import { connect } from "react-redux";
-
-import ProtectedRoute from "./containers/ProtectedRoute";
-import Home from "./containers/Home";
-import Login from "./containers/Login";
-
-function App(props) {
-  const { isAuthenticated, isVerifying } = props;
+const App = () => {
   return (
-    <Switch>
-      <ProtectedRoute
-        exact
-        path="/"
-        component={Home}
-        isAuthenticated={isAuthenticated}
-        isVerifying={isVerifying}
-      />
-      <Route path="/login" component={Login} />
-    </Switch>
+    <Router basename={process.env.PUBLIC_URL}>
+      <Layout />
+    </Router>
   );
-}
+};
 
-function mapStateToProps(state) {
-  return {
-    isAuthenticated: state.auth.isAuthenticated,
-    isVerifying: state.auth.isVerifying
-  };
-}
-
-export default connect(mapStateToProps)(App);
+export default App;
